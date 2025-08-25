@@ -33,7 +33,14 @@ pipenv run python email_agent.py
 ## Available Tools
 
 - **generate_email**: Creates professional emails from rough input
-- **send_email**: Sends emails via SMTP
+- **review_email**: Shows email preview and asks for confirmation
+- **send_email**: Sends emails via SMTP (only after review approval)
+
+## Email Workflow
+
+1. **Generate**: AI creates professional email from your rough input
+2. **Review**: You see a nice preview and approve/reject before sending
+3. **Send**: Email is sent only after your approval
 
 ## Example Interactions
 

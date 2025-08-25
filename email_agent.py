@@ -12,7 +12,6 @@ try:
 except ImportError:
     DOTENV_AVAILABLE = False
 
-
 class ToolDefinition:
     def __init__(
         self,
@@ -25,7 +24,6 @@ class ToolDefinition:
         self.description = description
         self.input_schema = input_schema
         self.function = function
-
 
 class Agent:
     def __init__(
@@ -48,7 +46,7 @@ class Agent:
             })
         
         message = self.client.messages.create(
-            model="claude-3-5-sonnet-latest",
+            model="claude-3-5-haiku-20241022", #"claude-3-5-sonnet-latest",
             max_tokens=1024,
             messages=conversation,
             tools=anthropic_tools if anthropic_tools else []
@@ -90,6 +88,27 @@ class Agent:
     
     def run(self):
         conversation = []
+        
+        # Add system message with instructions
+        system_message = {
+            "role": "user",
+            "content": [{
+                "type": "text", 
+                "text": """You are an email agent assistant. Follow these rules:
+
+1. NEVER use placeholder emails (like frank@example.com). If an email address is missing, ask the user for it.
+2. ALWAYS use the review_email tool to show the email preview and get user confirmation BEFORE sending any email.
+3. The workflow should be: generate_email → review_email → (if approved) send_email
+4. If the user doesn't provide required information (recipient email, name, or message), ask for it explicitly.
+
+Available tools:
+- generate_email: Create professional emails from rough input
+- review_email: Show email preview and get user confirmation 
+- send_email: Actually send the email (only after review approval)"""
+            }]
+        }
+        conversation.append(system_message)
+        
         print("\n\u001b[1mEmail Agent - Chat with Claude\u001b[0m")
         print("I can help you generate and send professional emails!")
         print("Type your messages and press Enter to chat")
@@ -146,7 +165,6 @@ class Agent:
                 "content": tool_results
             })
 
-
 # Email Tool Definitions
 def generate_email(input_data: Dict[str, Any]) -> Tuple[str, Optional[str]]:
     """Generate a professional email from rough input."""
@@ -156,7 +174,7 @@ def generate_email(input_data: Dict[str, Any]) -> Tuple[str, Optional[str]]:
         rough_message = input_data.get("rough_message", "")
         subject = input_data.get("subject", "")
         
-        # Check if required fields are missing
+        # Check if required fields are missing - DO NOT use placeholder emails
         missing_fields = []
         if not recipient_email:
             missing_fields.append("recipient_email")
@@ -166,7 +184,7 @@ def generate_email(input_data: Dict[str, Any]) -> Tuple[str, Optional[str]]:
             missing_fields.append("rough_message")
         
         if missing_fields:
-            return "", f"Missing required fields: {', '.join(missing_fields)}. Please provide these to generate the email."
+            return "", f"I need more information to generate the email. Please provide: {', '.join(missing_fields)}. Do not use placeholder emails - I need the actual recipient's email address."
         
         # Create a professional email structure
         email_content = {
@@ -186,24 +204,23 @@ Best regards,
     except Exception as e:
         return "", str(e)
 
-
 generate_email_definition = ToolDefinition(
     name="generate_email",
-    description="Generate a professional email from rough input. Requires recipient email, name, and rough message content.",
+    description="Generate a professional email from rough input. Requires recipient email, name, and rough message content. Always ask the user for missing information instead of using placeholders.",
     input_schema={
         "type": "object",
         "properties": {
             "recipient_email": {
                 "type": "string",
-                "description": "Email address of the recipient"
+                "description": "Email address of the recipient - REQUIRED, do not use placeholders"
             },
             "recipient_name": {
                 "type": "string",
-                "description": "Name of the recipient"
+                "description": "Name of the recipient - REQUIRED"
             },
             "rough_message": {
                 "type": "string",
-                "description": "The rough message content to be made professional"
+                "description": "The rough message content to be made professional - REQUIRED"
             },
             "subject": {
                 "type": "string",
@@ -215,6 +232,66 @@ generate_email_definition = ToolDefinition(
     function=generate_email
 )
 
+
+def review_email(input_data: Dict[str, Any]) -> Tuple[str, Optional[str]]:
+    """Display email for review and get user confirmation before sending."""
+    try:
+        recipient_email = input_data.get("recipient_email", "")
+        subject = input_data.get("subject", "")
+        body = input_data.get("body", "")
+        
+        if not recipient_email or not subject or not body:
+            return "", "Missing required fields: recipient_email, subject, and body are all required for review"
+        
+        # Display email in a nice format
+        print("\n" + "="*60)
+        print("📧 EMAIL PREVIEW")
+        print("="*60)
+        print(f"📤 To: {recipient_email}")
+        print(f"📋 Subject: {subject}")
+        print("-"*60)
+        print("📝 Body:")
+        print(body)
+        print("="*60)
+        
+        # Ask for confirmation with Claude styling
+        while True:
+            print(f"\n\u001b[93mClaude\u001b[0m: Do you want to send this email? (y/n): ", end="")
+            response = input().strip().lower()
+            if response in ['y', 'yes']:
+                return "Email approved for sending", None
+            elif response in ['n', 'no']:
+                return "", "Email sending cancelled by user"
+            else:
+                print(f"\u001b[93mClaude\u001b[0m: Please enter 'y' for yes or 'n' for no")
+        
+    except Exception as e:
+        return "", str(e)
+
+
+review_email_definition = ToolDefinition(
+    name="review_email",
+    description="Display the email in a nice format and ask for user confirmation before sending. Use this BEFORE sending any email.",
+    input_schema={
+        "type": "object",
+        "properties": {
+            "recipient_email": {
+                "type": "string",
+                "description": "Email address of the recipient"
+            },
+            "subject": {
+                "type": "string",
+                "description": "Email subject line"
+            },
+            "body": {
+                "type": "string",
+                "description": "Email body content"
+            }
+        },
+        "required": ["recipient_email", "subject", "body"]
+    },
+    function=review_email
+)
 
 def send_email(input_data: Dict[str, Any]) -> Tuple[str, Optional[str]]:
     """Send an email via SMTP."""
@@ -260,7 +337,6 @@ def send_email(input_data: Dict[str, Any]) -> Tuple[str, Optional[str]]:
     except Exception as e:
         return "", f"Failed to send email: {str(e)}"
 
-
 send_email_definition = ToolDefinition(
     name="send_email",
     description="Send an email via SMTP. Requires recipient_email, subject, and body.",
@@ -285,7 +361,6 @@ send_email_definition = ToolDefinition(
     function=send_email
 )
 
-
 def main():
     # Try to load from .env file if available
     if DOTENV_AVAILABLE:
@@ -306,14 +381,13 @@ def main():
             return "", False
     
     # Initialize tools
-    tools = [generate_email_definition, send_email_definition]
+    tools = [generate_email_definition, review_email_definition, send_email_definition]
     agent = Agent(client, get_user_message, tools)
     
     try:
         agent.run()
     except Exception as e:
         print(f"Error: {str(e)}")
-
 
 if __name__ == "__main__":
     main()
