@@ -24,10 +24,10 @@ class Agent:
     
     # Call the LLM with conversation history and available tools
     message = self.client.messages.create(
-        model="claude-3-5-haiku-20241022",
-        max_tokens=1024,
-        messages=conversation,
-        tools=anthropic_tools if anthropic_tools else []
+      model="claude-3-5-haiku-20241022",
+      max_tokens=1024,
+      messages=conversation,
+      tools=anthropic_tools if anthropic_tools else []
     )
 
     return message
