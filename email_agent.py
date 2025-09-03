@@ -173,6 +173,7 @@ class ToolDefinition:
     """Generate a professional email from rough input."""
     try:
       # Extract input parameters
+      sender_name = os.environ.get("SENDER_NAME", "Email Agent")
       recipient_email = input_data.get("recipient_email", "")
       recipient_name = input_data.get("recipient_name", "")
       rough_message = input_data.get("rough_message", "")
@@ -198,10 +199,10 @@ class ToolDefinition:
         "subject": subject if subject else "Professional Communication",
         "body": f"""Dear {recipient_name},
 
-        {rough_message}
+{rough_message}
 
-        Best regards,
-        [Your Name]"""
+Best regards,
+{sender_name}"""
       }
       
       return json.dumps(email_content, indent=2), None
