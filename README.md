@@ -120,6 +120,24 @@ python test_email.py
 
 Select option 1 to send a test email. If successful, you'll receive an email within seconds.
 
+### 7. Running the Agent
+
+Starting the agent is straightforward:
+
+```bash
+python email_agent.py
+```
+
+Once running, you can interact with the agent naturally. Try requests like: 
+
+```bash
+"Send an email to my_email@domain.com telling him about our meeting tomorrow" 
+```
+
+And watch as the agent generates the email, shows you a preview, and waits for your approval before sending.
+
+The agent will guide you through any missing information and handle errors gracefully. If something isn't working as expected, check that your SMTP credentials are properly configured and that your API key is set correctly.
+
 ## Troubleshooting
 
 ### Authentication Failed
@@ -148,10 +166,6 @@ email_agent/
 ├── Pipfile           # Python dependencies
 └── Pipfile.lock      # Locked dependency versions
 ```
-
-## Next Steps
-
-Once your test email sends successfully, you're ready to build the agent! Check out the course materials to start implementing the AI-powered email assistant.
 
 ## Support
 
