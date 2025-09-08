@@ -12,7 +12,7 @@ This repository contains three different versions of the Email AI Agent:
 **⚡ Basic Agent (basic-agent branch)** - A fully functional email AI agent with core features implemented and ready to be used.
 → [View Basic Agent](https://github.com/ferdelamad/email_agent/tree/basic-agent)
 
-**🔥 Enterprise Agent (enterprise branch)** - The most comprehensive version featuring more complex AI processing, as well as additional tools and reasoning.  
+**🔥 Advanced Agent (advanced branch)** - The most comprehensive version featuring more complex AI processing, as well as additional tools and reasoning.  
 → [View Advanced Agent](https://github.com/ferdelamad/email_agent/tree/advanced-agent)
 
 ## Prerequisites
