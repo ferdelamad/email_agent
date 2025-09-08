@@ -2,6 +2,19 @@
 
 A simple AI-powered email agent that can generate professional emails and send them via SMTP. This guide will walk you through setting up your development environment and configuring all necessary services.
 
+## Project Versions
+
+This repository contains three different versions of the Email AI Agent:
+
+**🌱 Starter Template (main branch)** - A clean foundation for building your own email agent from scratch. This is the starting version you'll need to follow along with the AI Agents Course.
+→ [View Starter Template](https://github.com/ferdelamad/email_agent)
+
+**⚡ Basic Agent (basic-agent branch)** - A fully functional email AI agent with core features implemented and ready to be used.
+→ [View Basic Agent](https://github.com/ferdelamad/email_agent/tree/basic-agent)
+
+**🔥 Enterprise Agent (enterprise branch)** - The most comprehensive version featuring more complex AI processing, as well as additional tools and reasoning.  
+→ [View Advanced Agent](https://github.com/ferdelamad/email_agent/tree/advanced-agent)
+
 ## Prerequisites
 
 ### Python 3.11+ Installation
